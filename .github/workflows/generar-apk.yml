@@ -1,0 +1,56 @@
+name: Generar APK de EduPlan
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Preparar SDK Android
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar dependencias de EduPlan
+        run: npm install --legacy-peer-deps --no-audit --no-fund
+
+      - name: Instalar Capacitor para Android
+        run: npm install --no-save --legacy-peer-deps --no-audit --no-fund @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
+
+      - name: Compilar React
+        run: npm run build
+
+      - name: Crear proyecto Android
+        run: npx cap add android
+
+      - name: Incorporar contenido web
+        run: npx cap sync android
+
+      - name: Generar APK instalable de prueba
+        working-directory: android
+        run: bash ./gradlew assembleDebug --no-daemon
+
+      - name: Publicar APK como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: EduPlan-APK-Android
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
