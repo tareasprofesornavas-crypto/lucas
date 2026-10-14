@@ -25,8 +25,13 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Preparar SDK Android
-        uses: android-actions/setup-android@v3
+      - name: Verificar SDK Android preinstalado
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          test -d "$ANDROID_HOME"
+          test -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" || command -v sdkmanager
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Instalar dependencias de EduPlan
         run: npm install --legacy-peer-deps --no-audit --no-fund
