@@ -1,0 +1,6 @@
+{
+  "name": "EduPlan - Tareas Escolares y Alertas",
+  "description": "App escolar de productividad con alertas anticipadas inteligentes según dificultad, gestor de documentos y funcionamiento con y sin internet.",
+  "requestFramePermissions": ["notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
