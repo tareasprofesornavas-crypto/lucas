@@ -25,13 +25,20 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Verificar SDK Android preinstalado
+      - name: Localizar SDK Manager e instalar componentes Android
+        shell: bash
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          test -d "$ANDROID_HOME"
-          test -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" || command -v sdkmanager
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+          set -euo pipefail
+          echo "ANDROID_HOME=${ANDROID_HOME:-}"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit 2>/dev/null || true)"
+          if [[ -z "$SDKMANAGER" ]]; then
+            echo "::error::sdkmanager no encontrado en cmdline-tools"
+            exit 1
+          fi
+          echo "SDK Manager: $SDKMANAGER"
+          chmod +x "$SDKMANAGER"
+          (yes || true) | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null
+          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Instalar dependencias de EduPlan
         run: npm install --legacy-peer-deps --no-audit --no-fund
