@@ -49,7 +49,16 @@ jobs:
         run: npm run build
 
       - name: Crear proyecto Android
-        run: npx cap add android
+        run: |
+          rm -f capacitor.config.ts
+          cat > capacitor.config.json <<'EOF'
+          {
+            "appId": "com.eduplan.escolar",
+            "appName": "EduPlan",
+            "webDir": "dist"
+          }
+          EOF
+          npx cap add android
 
       - name: Incorporar contenido web
         run: npx cap sync android
